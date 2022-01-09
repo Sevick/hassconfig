@@ -1,0 +1,40 @@
+vacuum_bedroom:
+      alias: "Vacuum Bedroom"
+      sequence:
+        - service: vacuum.send_command
+          data:
+            entity_id: vacuum.xiaomi_vacuum_cleaner
+            command: app_zoned_clean
+            params: [[17500,18000,21800,21000,1]]
+vacuum_dining_room:
+      alias: "Vacuum Dining Room"
+      sequence:
+        - service: vacuum.send_command
+          data:
+            entity_id: vacuum.xiaomi_vacuum_cleaner
+            command: app_zoned_clean
+            params: [[22750,23500,26000,26300,1]]
+vacuum_kitchen:
+      alias: "Vacuum Kitchen"
+      sequence:
+        - service: vacuum.send_command
+          data:
+            entity_id: vacuum.xiaomi_vacuum_cleaner
+            command: app_zoned_clean
+            params: [[18800,21500,25500,27500,1]]
+vacuum_living_room:
+      alias: "Vacuum Living Room"
+      sequence:
+        - service: vacuum.send_command
+          data:
+            entity_id: vacuum.xiaomi_vacuum_cleaner
+            command: app_zoned_clean
+            params: [[19500,21180,26000,26300,1]]
+vacuum_guestroom:
+      alias: "Vacuum Guestroom"
+      sequence:
+        - service: vacuum.send_command
+          data:
+            entity_id: vacuum.xiaomi_vacuum_cleaner
+            command: app_zoned_clean
+            params: [[17500,18000,21800,21000,1]]

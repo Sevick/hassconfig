@@ -1,0 +1,13 @@
+vacuum_room:
+  options:
+    - "bedroom"
+    - "guestroom"
+    - "living_room"
+    - "kitchen"
+    - "dining_room"
+    
+ac_mode:
+  options:
+    - "cool"
+    - "heat"
+    - "fan"

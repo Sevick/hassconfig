@@ -1,0 +1,14 @@
+sensor.israelseas_northern_coast:
+      templates:
+        icon_color: if (state >= 5) return '#ff2f00';
+              else return '#00c753';
+        icon: if (state >= 10) return mdi:rss;
+              else return mdi:waves;
+sensor.israelseas_northern_coast:
+      templates:
+        icon_color: if (state >= 5) return '#ff2f00';
+              else return '#00c753';
+sensor.israelseas_northern_coast:
+      templates:
+        icon_color: if (state >= 5) return '#ff2f00';
+              else return '#00c753';              

@@ -1,0 +1,7 @@
+disable_daily_vacuum:
+  name: Disable daily vacuum
+  icon: mdi:home-assistant
+
+disable_dustbin_notification:    
+  name: Disable dustbin notification
+  icon: mdi:home-assistant

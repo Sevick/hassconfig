@@ -1,0 +1,15 @@
+period:
+  name: Period (min)
+  initial: 30
+  min: 15
+  max: 59
+  step: 1
+  mode: slider
+  
+onperiod:
+  name: Active (min)
+  initial: 10
+  min: 5
+  max: 45
+  step: 1
+  mode: slider

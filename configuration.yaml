@@ -1,0 +1,229 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+frontend:
+  themes: !include_dir_merge_named themes
+
+
+api:
+
+homeassistant:
+  customize: !include customize.yaml
+  name: Nafanya
+  latitude: !secret latitude
+  longitude: !secret longitude
+  elevation: 30
+  unit_system: metric
+  time_zone: Asia/Jerusalem
+  internal_url: !secret inturl
+  allowlist_external_dirs:
+    - /config/temp/
+
+browser_mod:
+  devices:
+    de407e64-8bd3fa2f:
+      name: pcdisplay
+    eca91b61-a5ff9c0a:
+      name: salondisplay
+
+
+history:
+  exclude:
+    entities:
+      - sun.sun
+      - sensor.trafficinsrc
+      - sensor.trafficoutsrc
+      - sensor.statstrafficinsrc
+      - sensor.statstrafficoutsrc
+      - sensor.israelweather
+      - sensor.time
+      - sensor.time_utc
+      - sensor.time_date
+      - sensor.date_time
+      - sensor.date_time_iso
+      - sensor.date_time_utc
+      - timer.actimer
+      - sensor.pcuptimesrc
+      - sensor.eursrc
+      - sensor.usdsrc
+      - sensor.HassPiTrafficInSrc
+      - sensor.statsHassPiTrafficInSrc
+      - sensor.HassPiTrafficOutSrc
+      - sensor.statsHassPiTrafficOutSrc      
+    domains:
+      - mqtt
+      
+      
+updater:
+
+
+recorder:
+  db_url: !secret dburl
+  commit_interval: 30
+  purge_keep_days: 30
+  exclude:
+    event_types:
+      - component_loaded
+      - platform_discovered
+      - service_registered
+      - call_service
+    entities:
+      - sun.sun
+      - sensor.trafficinsrc
+      - sensor.trafficoutsrc
+      - sensor.statstrafficinsrc
+      - sensor.statstrafficoutsrc
+      - sensor.israelweather
+      - sensor.time
+      - sensor.time_utc
+      - sensor.time_date      
+      - sensor.date_time
+      - sensor.date_time_iso
+      - sensor.date_time_utc
+      - timer.actimer
+      - sensor.pcuptimesrc
+      - sensor.eursrc
+      - sensor.usdsrc
+      - sensor.HassPiTrafficInSrc
+      - sensor.statsHassPiTrafficInSrc
+      - sensor.HassPiTrafficOutSrc
+      - sensor.statsHassPiTrafficOutSrc
+    domains:
+      - mqtt
+
+logger:
+   default: info
+   logs:
+      homeassistant.components.snmp.sensor: info
+      homeassistant.components.rest.sensor: info
+      custom_components.israelweather.sensor: info
+      custom_components.israelseas: debug
+      custom_components.israelseas.sensor: debug
+      homeassistant.components.recorder: warn
+
+
+#mqtt_statestream: 
+#  base_topic: homeassistant
+#  publish_attributes: true
+#  publish_timestamps: true  
+  
+#mqtt:
+#  discovery: true
+#  broker: mqtt
+#  birth_message:
+#    topic: 'hass/status'
+#    payload: 'online'
+#  will_message:
+#    topic: 'hass/status'
+#    payload: 'offline'
+
+
+
+vacuum:
+  - platform: xiaomi_miio
+    host: !secret vacuum_host
+    token: !secret vacuum_token
+
+  
+
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+# http:
+#   base_url: example.duckdns.org:8123
+
+# Text to speech
+#tts:
+#  - platform: google_translate
+
+timer:
+  actimer:
+    duration: '00:10:00'
+    
+device_tracker:
+  - platform: bluetooth_le_tracker  
+    interval_seconds: 30
+    track_new_devices: false
+  - platform: bluetooth_tracker
+
+israelweather:
+  friendly_name: Israel weather
+
+
+
+stream:     
+
+camera:
+  - platform: mjpeg
+    name: RasPi4
+    still_image_url: http://192.168.1.16:8080/stream/snapshot.jpeg?delay_s=0
+    mjpeg_url: http://192.168.1.16:8080/stream/video.mjpeg
+    verify_ssl: false
+
+#camera:
+#  - platform: ffmpeg
+#    name: RasPi4
+#    input: rtsp://192.168.1.16:8554/unicast
+
+#rpi_camera:
+#camera:
+#  - platform: rpi_camera
+#    name: RasPi4
+#    timelapse: 100
+#    vertical_flip: 0
+#    file_path: "/home/homeassistant/temp/cam1.jpg"
+    
+
+shell_command:
+  play_sound: omxplayer -o hdmi /config/sound/pain.mp3
+
+localtuya:
+  - host: !secret socket1_host
+    local_key: !secret socket1_localkey
+    device_id: !secret socket1_deviceid
+    friendly_name: Socket1
+    protocol_version: "3.3"
+    entities:
+      - platform: switch
+        friendly_name: "Socket1 Switch"
+        id: 101
+      - platform: sensor
+        friendly_name: Current
+        id: 104
+        scaling: 0.001 # Optional
+        device_class: current # Optional
+        unit_of_measurement: "A" # Optional
+      - platform: sensor
+        friendly_name: Consumption
+        id: 105
+        scaling: 0.1
+        device_class: energy # Optional
+        unit_of_measurement: "Wh" # Optional
+      - platform: sensor
+        friendly_name: Voltage
+        id: 106
+        scaling: 0.1
+        device_class: voltage # Optional
+        unit_of_measurement: "V" # Optional  
+      - platform: light        
+        id: 1
+        friendly_name: "Socket1 Light"
+        color_mode: 2 # Optional, usually 2 or 21, default: "none"
+        brightness: 3 # Optional, usually 3 or 22, default: "none"
+        #color_temp: 4 # Optional, usually 4 or 23, default: "none"
+        color: 5 # Optional, usually 5 (RGB_HSV) or 24 (HSV), default: "none"
+        brightness_lower: 25 # Optional, usually 0 or 29, default: 29
+        brightness_upper: 255 # Optional, usually 255 or 1000, default: 1000
+        #color_temp_min: 0 # Optional, default: 2700
+        #color_temp_max: 255 # Optional, default: 6500
+        scene: 6
+
+    
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+input_number: !include input_number.yaml
+input_select: !include input_selects.yaml
+input_boolean: !include input_boolean.yaml
+sensor: !include sensors.yaml
+binary_sensor: !include binary_sensor.yaml

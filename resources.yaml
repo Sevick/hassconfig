@@ -1,0 +1,6 @@
+- url: /local/mini-graph-card-bundle.js?v=0.10.0
+  type: module
+- url: /local/card-mod.js
+  type: module
+- url: /local/clockwork-card.js
+  type: module

@@ -1,0 +1,143 @@
+- alias: 'Set HA theme for day and night'
+  trigger:
+    - platform: homeassistant
+      event: start
+    - platform: state
+      entity_id: sun.sun
+      to: above_horizon
+    - platform: state
+      entity_id: sun.sun
+      to: below_horizon
+  action:
+    - service_template: frontend.set_theme
+      data_template:
+        name: >
+          {% if states.sun.sun.state == "above_horizon" %}
+            default
+          {% else %}
+            s-dark
+          {% endif %}
+
+
+          
+- id: switch_dashboard
+  alias: Switch dashboard
+  trigger:
+  - event_data:
+      action: click
+    event_type: esphome.button1
+    platform: event
+  action:
+  - data:
+      command: navigate
+      deviceID:
+      - eca91b61-a5ff9c0a
+      navigation_path: /lovelace-disp/cam1
+    service: browser_mod.navigate
+    
+    
+          
+- id: pi4gesture_r
+  alias: pi4gesture_r
+  trigger:
+  - event_data:
+      action: right
+    event_type: pi4gesture
+    platform: event
+  action:
+  - data:
+      command: navigate
+      deviceID:
+      - eca91b61-a5ff9c0a
+      navigation_path: /lovelace-disp/cam1
+    service: browser_mod.navigate    
+    
+- id: pi4gesture_l
+  alias: pi4gesture_l
+  trigger:
+  - event_data:
+      action: left
+    event_type: pi4gesture
+    platform: event
+  action:
+  - data:
+      command: navigate
+      deviceID:
+      - eca91b61-a5ff9c0a
+      navigation_path: /lovelace-disp/disphosme
+    service: browser_mod.navigate      
+    
+    
+    
+- id: vacuum
+  alias: Start Cleaning Room
+  trigger:
+  - platform: state
+    entity_id: input_select.vacuum_room
+    from: Select Input
+  condition:
+    condition: and
+    conditions:
+    - condition: state
+      entity_id: input_boolean.daily_vacuum_first_run
+      state: 'on'
+    - condition: time
+      after: 08:30:00
+      before: '23:30:00'
+    - condition: template
+      value_template: "{% if states.automation.send_alert_after_daily_vacuum_to_empty_the_dustbin.last_triggered\
+        \ is not none %}\n  {% if as_timestamp(now()) | int   -  as_timestamp(states.automation.send_alert_after_daily_vacuum_to_empty_the_dustbin.attributes.last_triggered)\
+        \ | int > 1800 %} true {% else %} false\n  {% endif %}\n{% else %} false {%\
+        \ endif %}\n"
+    - condition: state
+      entity_id: input_boolean.disable_dustbin_notification
+      state: 'off'
+  action:
+  - service: script.turn_on
+    data_template:
+      entity_id: "{% if is_state(\"input_select.vacuum_room\", \"bedroom\") %}\n \
+        \ script.vacuum_bedroom\n{% elif is_state(\"input_select.vacuum_room\", \"\
+        guest room\") %}\n  script.vacuum_guestroom\n{% elif is_state(\"input_select.vacuum_room\"\
+        , \"dining room\") %}\n  script.vacuum_dining_room\n{% elif is_state(\"input_select.vacuum_room\"\
+        , \"kitchen\") %}\n  script.vacuum_kitchen\n{% elif is_state(\"input_select.vacuum_room\"\
+        , \"living room\") %}\n  script.vacuum_living_room\n{% else %} {% endif %}\n"
+  - service: input_select.select_option
+    entity_id: input_select.vacuum_room
+    data_template:
+      option: Select Input
+      
+- id: autoac
+  alias: AutoAC
+  description: 'Periodic airconditioning'
+  trigger:
+    platform: time_pattern
+    minutes: '/1'
+  condition: 
+    condition: and
+    conditions:
+      - condition: state
+        entity_id: 'climate.my_electra_ac'
+        state: 'off'
+      - condition: template
+        value_template: "{{ now().minute % states('input_number.period')|int == 0 }}"  
+  action:
+  - service: climate.set_hvac_mode
+    data_template:
+      hvac_mode: "{{states('input_select.ac_mode')}}"
+    entity_id: climate.my_electra_ac    
+  - service: timer.start      
+    data_template:
+      entity_id: timer.actimer 
+      duration: "{{ states('input_number.onperiod') | int * 60 }}"      
+
+    
+- id: acautostop
+  alias: acautostop  
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.actimer
+  action:
+  - service: climate.turn_off
+    entity_id: climate.my_electra_ac

@@ -1,0 +1,423 @@
+- platform: template
+  sensors:
+    vacuum_status:
+      friendly_name: Status
+      value_template: 'Status: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.status }}'
+      icon_template: >
+        {% set val =  states.vacuum.xiaomi_vacuum_cleaner.attributes.status  %}
+        {% if val == 'Charging' %}
+          mdi:battery-charging
+        {% elif val == 'Cleaning' %}
+          mdi:move-resize
+        {% elif val == 'Returning home' %}
+          mdi:keyboard-return
+        {% elif val == 'Idle' %}
+          mdi:dots-horizontal
+        {% elif val == 'Paused' %}
+          mdi:pause-circle
+        {% else %}
+          mdi:help-circle
+        {% endif %}
+    vacuum_fan_speed:
+      friendly_name: Fan Speed
+      value_template: 'Mode: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.fan_speed }}'
+      icon_template: 'mdi:speedometer'
+    vacuum_battery:
+      friendly_name: Vacuum Battery
+      value_template: 'Battery: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.battery_level }}'
+      unit_of_measurement: '%'
+      icon_template: '{{ states.vacuum.xiaomi_vacuum_cleaner.attributes.battery_icon }}'
+    vacuum_cleaning_time:
+      friendly_name: Time of Last Cycle
+      value_template: '{{ states.vacuum.xiaomi_vacuum_cleaner.attributes.cleaning_time }}'
+      icon_template: 'mdi:timer'
+    vacuum_cleaned_area:
+      friendly_name: Area of Last Cycle
+      unit_of_measurement: 'm ²'
+      value_template: '{{ states.vacuum.xiaomi_vacuum_cleaner.attributes.cleaned_area }}'
+      icon_template: 'mdi:ruler'
+    vacuum_cleanmainbrush:
+      friendly_name: Replace main brush
+      unit_of_measurement: 'h'
+      value_template: 'Main Brush: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.main_brush_left }}'
+      icon_template: 'mdi:screwdriver'
+    vacuum_cleansidebrush:
+      friendly_name: Replace side brush
+      unit_of_measurement: 'h'
+      value_template: 'Side brush: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.side_brush_left }}'
+      icon_template: 'mdi:screwdriver'
+    vacuum_cleanfilter:
+      friendly_name: Replace filter
+      unit_of_measurement: 'h'
+      value_template: 'Filter: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.filter_left }}'
+      icon_template: 'mdi:screwdriver'
+    vacuum_sensordirtyleft:
+      friendly_name: Replace filter
+      unit_of_measurement: 'h'
+      value_template: 'Sensor: {{ states.vacuum.xiaomi_vacuum_cleaner.attributes.sensor_dirty_left }}'
+      icon_template: 'mdi:screwdriver'
+    vacuum_do_not_disturb:
+      friendly_name: Do Not Disturb
+      value_template: '{{ states.vacuum.xiaomi_vacuum_cleaner.attributes.do_not_disturb }}'
+      icon_template: >
+        {% set val =  states.vacuum.xiaomi_vacuum_cleaner.attributes.do_not_disturb  %}
+        {% if val == 'on' %}
+          mdi:do-not-disturb
+        {% else %}
+          mdi:do-not-disturb-off
+        {% endif %}
+    vacuum_operation:
+      value_template: 'Operation'
+    vacuum_accessories:
+      value_template: 'Maintenance'
+      
+      
+- platform: version
+
+
+- platform: template
+  scan_interval: 00:01:00
+  sensors:
+    home_temperature:
+      friendly_name: "temp"
+      unit_of_measurement: '°C'
+      value_template: "{{ state_attr('weather.home', 'temperature') }}"
+- platform: systemmonitor
+  resources:
+    - type: disk_use_percent
+      arg: /
+    - type: disk_use
+      arg: /
+    - type: disk_free
+      arg: /
+    - type: memory_free
+    - type: memory_use
+    - type: memory_use_percent
+    - type: swap_use   
+    - type: load_1m
+    - type: processor_use  
+- platform: rest
+  name: usdsrc
+  resource: https://www.boi.org.il/currency.xml
+  json_attributes_path: "$...CURRENCY[?(@.CURRENCYCODE=='USD')]"
+  json_attributes:
+    - "CURRENCYCODE"
+    - "RATE"
+    - "CHANGE"
+  value_template: '{{value_json.CURRENCIES.LAST_UPDATE}}'
+  scan_interval: 01:00:00
+- platform: rest
+  name: eursrc
+  resource: https://www.boi.org.il/currency.xml
+  json_attributes_path: "$...CURRENCY[?(@.CURRENCYCODE=='EUR')]"
+  json_attributes:
+    - "CURRENCYCODE"
+    - "RATE"
+    - "CHANGE"
+  value_template: '{{value_json.CURRENCIES.LAST_UPDATE}}'
+  scan_interval: 01:00:00
+- platform: template
+  scan_interval: 01:00:00
+  sensors:
+      usd:
+        unique_id: usd
+        friendly_name: "USD"
+        value_template: "{{ state_attr('sensor.usdsrc', 'RATE') | round(2) }}"
+        unit_of_measurement: 'ILS'  
+        icon_template: mdi:currency-usd
+      eur:
+        unique_id: eur
+        friendly_name: "EUR"
+        value_template: "{{ state_attr('sensor.eursrc', 'RATE') | round(2) }}"
+        unit_of_measurement: 'ILS'  
+        icon_template: mdi:currency-eur
+    
+
+- platform: template
+  scan_interval: 01:00:00
+  sensors:
+      southmideterwaves:
+          friendly_name: "Southern coast waves"
+          value_template: "{{ state_attr('sensor.israelseas_southern_coast', 'Waves height') }}"
+          unit_of_measurement: 'cm'      
+          icon_template: mdi:waves
+      southmideterwavesmax:
+          friendly_name: "Southern coast waves max"
+          value_template: "{{ state_attr('sensor.israelseas_southern_coast', 'Waves max') }}"
+          unit_of_measurement: 'cm'      
+          icon_template: >-
+             {% if state_attr('sensor.israelseas_southern_coast', 'Waves max')|int(0) > 150 %}
+                mdi:waves
+             {% else %}
+                mdi:wave
+             {% endif %}
+      southmideteruv:
+          friendly_name: "Southern coast UV"
+          value_template: "{{ state_attr('sensor.israelseas_southern_coast', 'UVIndex') }}"
+          unit_of_measurement: ''      
+          icon_template: mdi:weather-sunny   
+         
+         
+      northmideterwaves:
+          friendly_name: "Northern coast waves"
+          value_template: "{{ state_attr('sensor.israelseas_northern_coast', 'Waves height') }}"
+          unit_of_measurement: 'cm'
+          icon_template: mdi:waves
+      northmideterwavesmax:
+          friendly_name: "Northern coast waves max"
+          value_template: "{{ state_attr('sensor.israelseas_northern_coast', 'Waves max') }}"
+          unit_of_measurement: 'cm'
+          icon_template: >-
+             {% if state_attr('sensor.israelseas_northern_coast', 'Waves max')|int(0) > 150 %}
+                mdi:waves
+             {% else %}
+                mdi:wave
+             {% endif %}       
+      northmideteruv:
+          friendly_name: "Northern coast UV"
+          value_template: "{{ state_attr('sensor.israelseas_northern_coast', 'UVIndex') }}"
+          unit_of_measurement: ''
+          icon_template: mdi:weather-sunny       
+
+          
+
+      galileewaves:
+          friendly_name: "Galilee waves"
+          value_template: "{{ state_attr('sensor.israelseas_sea_of_galilee', 'Waves height') }}"
+          unit_of_measurement: 'cm'
+          icon_template: mdi:waves
+      galileewavesmax:
+          friendly_name: "Galilee waves max"
+          value_template: "{{ state_attr('sensor.israelseas_sea_of_galilee', 'Waves max') }}"
+          unit_of_measurement: 'cm'
+          icon_template: >-
+             {% if state_attr('sensor.israelseas_sea_of_galilee', 'Waves max')|int(0) > 150 %}
+                mdi:waves
+             {% else %}
+                mdi:wave
+             {% endif %}         
+      galileeuv:
+          friendly_name: "Galilee UV"
+          value_template: "{{ state_attr('sensor.israelseas_sea_of_galilee', 'UVIndex') }}"
+          unit_of_measurement: ''
+          icon_template: mdi:weather-sunny     
+
+          
+      elattemp:
+          friendly_name: "Elat water temperature"
+          value_template: "{{ state_attr('sensor.israelseas_gulf_of_elat', 'Sea temperature') }}"
+          unit_of_measurement: '°C' 
+      elatwaves:
+          friendly_name: "Elat waves"
+          value_template: "{{ state_attr('sensor.israelseas_gulf_of_elat', 'Waves height') }}"
+          unit_of_measurement: 'cm'
+          icon_template: mdi:waves
+      elatwavesmax:
+          friendly_name: "Elat waves max"
+          value_template: "{{ state_attr('sensor.israelseas_gulf_of_elat', 'Waves max') }}"
+          unit_of_measurement: 'cm'
+          icon_template: >-
+             {% if state_attr('sensor.israelseas_gulf_of_elat', 'Waves max')|int(0) > 150 %}
+                mdi:waves
+             {% else %}
+                mdi:wave
+             {% endif %}        
+      elatuv:
+          friendly_name: "Elat UV"
+          value_template: "{{ state_attr('sensor.israelseas_gulf_of_elat', 'UVIndex') }}"
+          unit_of_measurement: ''
+          icon_template: mdi:weather-sunny
+          
+          
+          
+- platform: rest
+  resource: http://localhost:15672/api/queues/%2F/tmp/
+  username: !secret rabbitmonuser
+  password: !secret rabiitmonpassword
+  value_template: '{{ value_json.messages }}'
+  unit_of_measurement: "msgs"
+  scan_interval: 30
+
+
+- platform: command_line
+  name: HassPiCpuTemperature
+  command: "cat /sys/class/thermal/thermal_zone0/temp"
+  unit_of_measurement: "°C"
+  value_template: '{{ value | multiply(0.001) | round(1) }}'
+- platform: command_line
+  name: HassPiTrafficInSrc
+  command: "netstat -s | grep InOctets | awk '{print $2}' "
+  unit_of_measurement: "Kb"
+  value_template: '{{ value | multiply(0.0078) | round(2) }}'
+  scan_interval: 00:00:30
+- platform: command_line
+  name: HassPiTrafficOutSrc
+  command: "netstat -s | grep OutOctets | awk '{print $2}' "
+  unit_of_measurement: "Kb"
+  value_template: '{{ value | multiply(0.0078) | round(2) }}'
+  scan_interval: 00:00:30
+- platform: statistics
+  name: statsHassPiTrafficInSrc
+  entity_id: sensor.HassPiTrafficInSrc
+  state_characteristic: change  
+  max_age:
+    minutes: 5
+- platform: statistics
+  name: statsHassPiTrafficOutSrc
+  entity_id: sensor.HassPiTrafficOutSrc
+  state_characteristic: change
+  max_age:
+    minutes: 5  
+- platform: template
+  sensors:
+    hasspitrafficin:
+      friendly_name: "in"
+      value_template: >
+          {% if states('sensor.statsHassPiTrafficInSrc')|int(0) < 0 %}
+              '0.0'|float
+          {% else %}
+              {{ '%.1f'|format(states('sensor.statsHassPiTrafficInSrc')|float(0.0) / 300) }}
+          {% endif %}
+      unit_of_measurement: "Kb/sec" 
+    hasspitrafficout:
+      friendly_name: "out"
+      value_template: >
+          {% if states('sensor.statsHassPiTrafficOutSrc')|int(0) < 0 %}
+              '0.0'|float
+          {% else %}
+              {{ '%.1f'|format(states('sensor.statsHassPiTrafficOutSrc')|float(0.0) / 300) }}
+          {% endif %}
+      unit_of_measurement: "Kb/sec"  
+      
+- platform: template
+  sensors:
+    hassfreememory:
+      friendly_name: "Memory free"
+      value_template: >
+        {% set datasize = states.sensor.disk_free.state | float(0.0) %}
+        {%- if datasize > 900 -%}
+          {{ datasize/1024 | round(1) }} Gb
+        {%- else -%}
+          {{ datasize | round(1) }} Mb
+        {%- endif -%}       
+  
+  
+- platform: command_line
+  name: HassPiStartup
+  command: "uptime -s"
+  value_template: '{{ value }}'
+
+- platform: template
+  scan_interval: 00:01:00
+  sensors:
+      hasspiuptime:
+          friendly_name: "Pi4 uptime"
+          value_template: "{{ states.sensor.hasspistartup.state | as_datetime }}"
+          device_class: timestamp  
+          unit_of_measurement: "sec"
+
+  
+- platform: snmp
+  version: 2c
+  host: 192.168.1.19
+  community: public
+  name: 'PCUptimeSrc'
+  accept_errors: true
+  baseoid: 1.3.6.1.2.1.25.1.1.0
+  scan_interval: 00:01:00
+
+  
+- platform: template
+  sensors:
+    pcuptime:
+      friendly_name: PC uptime
+      value_template: >
+        {% set uptime = states.sensor.pcuptimesrc.state | int(0) /100 %}
+        {% set days = (uptime / 86400) | int(0) %}
+        {%- if days > 0 -%}
+          {{ days }} days, {{ (uptime - (days * 86400)) | int(0) | timestamp_custom('%-H Hours, %-M Minutes', false) }}
+        {%- else -%}
+          {{ uptime | int(0) | timestamp_custom('%-H Hours, %-M Minutes', false) }}
+        {%- endif -%}      
+
+
+- platform: snmp
+  version: 2c
+  host: 192.168.1.19
+  community: public
+  name: 'PCtrafficInSrc'
+  accept_errors: true
+  baseoid: 1.3.6.1.2.1.2.2.1.10.9
+  unit_of_measurement: "bytes"
+  scan_interval: 00:00:30
+- platform: snmp
+  version: 2c
+  host: 192.168.1.19
+  community: public
+  name: 'PCtrafficOutSrc'
+  accept_errors: true
+  baseoid: 1.3.6.1.2.1.2.2.1.16.9
+  unit_of_measurement: "bytes"  
+  scan_interval: 00:00:30
+- platform: statistics
+  name: statsTrafficInSrc
+  state_characteristic: change
+  entity_id: sensor.PCtrafficInSrc
+  max_age:
+    minutes: 5
+- platform: statistics
+  name: statsTrafficOutSrc
+  state_characteristic: change
+  entity_id: sensor.PCtrafficOutSrc
+  max_age:
+    minutes: 5      
+- platform: template
+  sensors:
+    pctrafficin:
+      friendly_name: "in"
+      value_template: >
+          {% if states("sensor.statstrafficinsrc")|int(0) < 0 %}
+              '0.0'|float(0.0)
+          {% else %}
+              {{ '%.1f'|format(states("sensor.statstrafficinsrc")|float(0.0) / 30720) }}
+          {% endif %}
+      unit_of_measurement: "Kb/sec" 
+    pctrafficout:
+      friendly_name: "out"
+      value_template: >
+          {% if states('sensor.statstrafficoutsrc')|int(0) < 0 %}
+              '0.0'|float
+          {% else %}
+              {{ '%.1f'|format(states('sensor.statstrafficoutsrc')|float(0.0) / 30720) }}
+          {% endif %}
+      unit_of_measurement: "Kb/sec"
+- platform: uptime
+- platform: dht
+  sensor: DHT22
+  pin: 17  #D11 #17
+  #temperature_offset: 2.1
+  #humidity_offset: -3.2
+  monitored_conditions:
+    - temperature
+    - humidity
+- platform: time_date
+  display_options:
+    - 'time'
+    - 'date'
+    - 'date_time'
+    - 'date_time_utc'
+    - 'date_time_iso'
+    - 'time_date'
+    - 'time_utc'
+    - 'beat'
+    
+- platform: israelseas
+  scan_interval: 00:01:00 
+  beaches:
+      - Northern Coast      
+      - Southern Coast
+      - Sea of Galilee
+      - Gulf of Elat
+      
+- platform: israelweather
+  scan_interval: 00:01:00      
