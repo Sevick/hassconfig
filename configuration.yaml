@@ -16,8 +16,14 @@ homeassistant:
   unit_system: metric
   time_zone: Asia/Jerusalem
   internal_url: !secret inturl
+  external_url: !secret exturl
   allowlist_external_dirs:
     - /config/temp/
+
+# Text to speech
+#tts:
+#  - platform: google_translate
+
 
 browser_mod:
   devices:
@@ -35,7 +41,6 @@ history:
       - sensor.trafficoutsrc
       - sensor.statstrafficinsrc
       - sensor.statstrafficoutsrc
-      - sensor.israelweather
       - sensor.time
       - sensor.time_utc
       - sensor.time_date
@@ -94,12 +99,15 @@ recorder:
 logger:
    default: info
    logs:
+      homeassistant.core: warn
+      homeassistant.components.mqtt: warn
       homeassistant.components.snmp.sensor: info
       homeassistant.components.rest.sensor: info
-      custom_components.israelweather.sensor: info
+      homeassistant.components.recorder: warn
       custom_components.israelseas: debug
       custom_components.israelseas.sensor: debug
-      homeassistant.components.recorder: warn
+      custom_components.localtuya: debug
+
 
 
 #mqtt_statestream: 
@@ -108,15 +116,16 @@ logger:
 #  publish_timestamps: true  
   
 #mqtt:
-#  discovery: true
-#  broker: mqtt
+#  discovery: false
+#  broker: !secret rabbithost
+#  username: !secret rabbithassuser
+#  password: !secret rabbithasspassword
 #  birth_message:
-#    topic: 'hass/status'
-#    payload: 'online'
+#    topic: "hass/status"
+#    payload: "online"
 #  will_message:
-#    topic: 'hass/status'
-#    payload: 'offline'
-
+#    topic: "hass/status"
+#    payload: "offline"
 
 
 vacuum:
@@ -124,16 +133,6 @@ vacuum:
     host: !secret vacuum_host
     token: !secret vacuum_token
 
-  
-
-
-# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
-# http:
-#   base_url: example.duckdns.org:8123
-
-# Text to speech
-#tts:
-#  - platform: google_translate
 
 timer:
   actimer:
@@ -145,8 +144,8 @@ device_tracker:
     track_new_devices: false
   - platform: bluetooth_tracker
 
-israelweather:
-  friendly_name: Israel weather
+#israelweather:
+#  friendly_name: Israel weather
 
 
 

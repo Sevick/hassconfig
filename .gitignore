@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Homeassistant secret
+secrets.yaml
+known_devices.yaml
