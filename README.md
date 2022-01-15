@@ -1,1 +1,3 @@
-#hassconfig
+# hassconfig
+
+My homeassistant configuration
